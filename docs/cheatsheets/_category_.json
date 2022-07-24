@@ -1,0 +1,8 @@
+{
+  "label": "Cheatsheets",
+  "position": 99,
+  "link": {
+    "type": "generated-index",
+    "description": "This section contains documents with a list of commonly used commands and flags for different tools."
+  }
+}

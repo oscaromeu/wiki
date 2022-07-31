@@ -1,0 +1,8 @@
+{
+  "label": "Prometheus",
+  "position": 1,
+  "link": {
+    "type": "generated-index",
+    "description": "Prometheus Monitoring Notes"
+  }
+}

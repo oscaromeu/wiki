@@ -20,7 +20,7 @@ scrape_configs:
 ```
 
 + `global`: configures certain global settings and default values.
-+ `scrape_configs`: specifies which targets Prometheus should scrape. Targets may be statically configured via the `static_configs` parameter or dynamically discovered using one of the supported service-discovery mechanisms.
++ `scrape_configs`: specifies which targets Prometheus should scrape. Targets may be statically configured via the `static_configs` parameter or dynamically discovered using one of the supported service-discovery mechanisms. 
 
 Bind-mount the `prometheus.yml` from the host by running
 

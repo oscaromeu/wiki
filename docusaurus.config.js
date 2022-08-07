@@ -68,7 +68,7 @@ const config = {
              docId: 'intro',
              position: 'left',
              label: 'Notes',
-             }, **/
+             },**/
           {
             href: 'https://github.com/facebook/docusaurus',
             label: 'GitHub',

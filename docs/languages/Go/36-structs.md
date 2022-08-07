@@ -9,4 +9,4 @@ draft: false
 
 ## Introduction
 
-A `struct` is a collection of fileds. 
+A `struct` is a collection of fileds. A field 

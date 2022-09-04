@@ -7,6 +7,8 @@ sidebar_position: 1
 
 # Pod
 
+## Introducción
+
 La unidad más pequeña de ejecución que puede utilizar Kubernetes es el [*Pod*](https://kubernetes.io/es/docs/concepts/workloads/pods/pod/), en inglés Pod significa "vaina", y podemos entender un Pod como una envoltura que contiene uno o varios contenedores (en la mayoría de los casos un solo contenedor). Las principales características que tiene un pod son:
 
 ![](./img/pod-1.png#center)
@@ -48,7 +50,7 @@ ejecutando un proceso de nginx en un contenedor y otro proceso de php-fpm en otr
 
 Todos los contenedores dentro de un pod comparten un mismo namespace de red (`netns`) y por lo tanto las interfaces de red, las direccion(es) IP y los  puertos que pertenecen a este. 
 
-Debido a que los puertos son compartidos, los contenedores tienen que usar puertos diferentes para exponer sus servicios, un mismo puerto no puede ser usado al mismo tiempo por dos o más contenedores. Por ejemplo, si levantaramos 2 contenedores de `nginx` en el mismo pod obtendriamos un error al intentar desplegarlo. 
+Debido a que los puertos son compartidos, los contenedores tienen que usar puertos diferentes para exponer sus servicios. Un mismo puerto no puede ser usado al mismo tiempo por dos o más contenedores. Por ejemplo, si levantaramos 2 contenedores de `nginx` en el mismo pod obtendriamos un error al intentar desplegarlo. 
 
 ![](./img/pod-5.png#center)
 

@@ -1,7 +1,8 @@
 # Gestionando los Pods
 
-Tenemos un fichero [`pod.yaml`](files/pod.yaml), donde hemos definido
-un Pod de la siguiente manera:
+## Creando pods usando ficheros YAML
+
+Vamos a crear un pod a partir del fichero ([`pod.yaml`](files/pod.yaml)) que hemos visto en la sección anterior :
 
 ```yaml
 apiVersion: v1
@@ -18,50 +19,86 @@ spec:
      imagePullPolicy: Always
 ```
 
-Podemos crear directamente el Pod desde el fichero yaml:
+### Crear un pod mediante `kubectl create`
 
-    kubectl create -f pod.yaml
+Para crear el pod a partir del fichero anterior ejecutamos
 
-Y podemos ver el estado en el que se encuentra y si está o no listo:
+```
+$ kubectl create -f pod.yaml 
+pod/pod-nginx created
+```
 
-    kubectl get pods
+El comando `kubectl create -f` se puede usar para crear cualquier recurso (no solamente pods) a partir de un fichero YAML o JSON. 
 
-(Sería equivalente usar po, pod o pods).
+:::info
+Es posible crear un Pod de manera imperativa mediante `kubectl` de la siguiente manera:
 
-Si queremos ver más información sobre los Pods, como por ejemplo,
-saber en qué nodo del cluster se está ejecutando:
+```
+$ kubectl run pod-nginx --image=nginx
+```
 
-    kubectl get pod -o wide
+De esta forma se crea un Pod con un contenedor que utiliza la imagen `nginx:latest` (no hemos especificado una versión) del registro que esté definido por defecto en el cluster de Kubernetes, se asigna una dirección IP y se lanza en uno de los nodos del cluster. 
+:::
 
-Para obtener información más detallada del Pod (equivalente al inspect
-de docker):
+#### Listando los Pods 
 
-    kubectl describe pod pod-nginx
+El pod se ha creado pero, ¿cómo sabemos que esta corriendo? Vamos a listar los pods que tenemos ejecutandose en el cluster y a visualizar su estado:
 
-Podríamos editar el Pod y ver todos los atributos que definen el
-objeto, la mayoría de ellos con valores asignados automáticamente por
-el propio Kubernetes y podremos actualizar ciertos valores:
+```
+$ kubectl get pods
+NAME        READY   STATUS    RESTARTS   AGE
+pod-nginx   1/1     Running   0          51s
+```
 
-    kubectl edit pod pod-nginx
 
-Sin embargo, es una opción compleja para utilizarla a estas alturas
-del curso y hay que comprender mejor cómo funcionan los objetos de
-Kubernetes para poder hacer modificaciones de forma apropiada, y además,
-veremos más adelante otra manera más correcta de actualizar un objeto
-de Kubernetes.
+Si queremos ver más información sobre los Pods, como por ejemplo, saber en qué nodo del cluster se está ejecutando: 
 
-Normalmente no se interactúa directamente con el Pod a través de una
-shell, pero sí se obtienen directamente los logs al igual que se hace
-en docker:
+```
+$ kubectl get pod -o wide
+NAME        READY   STATUS    RESTARTS   AGE   IP           NODE                 
+pod-nginx   1/1     Running   0          80s   10.244.0.5   kind-control-plane
+```
 
-    kubectl logs pod-nginx
+### Logs dentro del Pod
 
-En el caso poco habitual de que queramos ejecutar alguna orden
-adicional en el Pod, podemos utilizar el comando `exec`, por ejemplo,
-en el caso particular de que queremos abrir una shell de forma
-interactiva:
+Los logs son una de las herramientas que tenemos para poder hacer depuración de errores. Podemos obtener los logs del Pod creado a través del comando:
 
+```
+$ kubectl logs pod-nginx
+```
+
+Si queremos mantener el seguimiento de los logs del Pod podemos usar el parámetro `--follow` o `-f`
+
+```
+kubectl logs pod-nginx -f
+```
+
+:::info
+Los Pods son los únicos objetos en Kubernetes que utilizan el comando `kubectl logs`
+:::
+
+## Obtener información del Pod
+
+Para obtener información más detallada del Pod (equivalente al inspect de docker):
+
+```
+kubectl describe pod pod-nginx
+```
+
+### Eventos
+
+### Estados
+
+
+## Acceder al contenedor creado
+
+Al igual que en Docker, Kubectl permite acceder a los contenedores de un Pod a través del comando `exec` 
+
+Por ejemplo, podriamos utilizar el siguiente comando para acceder al Pod creado y comprobar el valor de las variables de entorno
+
+```
     kubectl exec -it pod-nginx -- /bin/bash
+```
 
 Podemos acceder a la aplicación, redirigiendo un puerto de localhost
 al puerto de la aplicación:
@@ -98,6 +135,3 @@ Y por último, eliminamos el Pod mediante:
 
     kubectl delete pod pod-nginx
 
-## Vídeo
-
-[https://www.youtube.com/watch?v=OA0OheCtrXo](https://www.youtube.com/watch?v=OA0OheCtrXo)

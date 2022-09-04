@@ -107,6 +107,8 @@ flux reconcile source git live-infra-secrets
 
 ## Encrypt secrets with sops and age
 
+### Configure age to encrypt secrets with sops
+
 Generate an age key with `age` using `age-keygen`
 
 ```
@@ -139,6 +141,8 @@ creation_rules:
 
 Notice that we added the age public key in the YAML file. 
 
+### Encrypt secrets with sops and age
+
 Use `sops` and the age public key to encrypt a Kubernetes secret:
 
 1. Create generic plain kubernetes secret
@@ -163,6 +167,38 @@ cat age.agekey |
 kubectl create secret generic sops-age \
 --namespace=flux-system \
 --from-file=age.agekey=/dev/stdin
+```
+
+### Dencrypt sops encrypted secrets using age
+
+Sops will lookup for a data key to decrypt the sops file. The file is located at 
+
+```
+$HOME/.age-keys/age-key.txt
+```
+
+```
+➜  live-infra-secrets git:(main) ls -ltrha
+total 32K
+-rw-r--r--   1 oscar oscar   21 ago  7 16:50 README.md
+-rw-r--r--   1 oscar oscar  115 ago  7 18:01 kustomization.yaml
+drwxr-xr-x   3 oscar oscar 4,0K ago  7 18:18 .
+-rw-r--r--   1 oscar oscar 1,3K ago  7 18:27 sops-test-secret-encrypted.yaml
+drwxr-xr-x   8 oscar oscar 4,0K ago  7 18:27 .git
+drwxr-xr-x 128 oscar oscar  12K ago 21 12:34 ..
+```
+
+```bash
+➜  live-infra-secrets git:(main) sops -d sops-test-secret-encrypted.yaml
+apiVersion: v1
+data:
+    foo: YmFy
+kind: Secret
+metadata:
+    creationTimestamp: null
+    name: sopstest
+    namespace: monitoring
+➜  live-infra-secrets git:(main)
 ```
 
 ### Gitops workflow

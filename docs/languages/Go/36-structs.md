@@ -245,3 +245,6 @@ All this also applies to structs.
 + Structs are comparable if all of their fields are comparable.
 + Structs can be passed to and returned by functions.
 + Use a pointer to a struct to make function calls more efficient, but be aware of possible side effects.
+
+
+https://asankov.dev/blog/2022/01/29/different-ways-to-initialize-go-structs/

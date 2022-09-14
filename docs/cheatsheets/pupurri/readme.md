@@ -5,6 +5,65 @@ sidebar_label: Pupurri
 sidebar_position: 1
 ---
 
+## TCPDump
+
+### Traffic Isolation Examples
+
+Let’s start with a basic command that will get us HTTPS traffic:
+
+```
+tcpdump -nnSX port 443
+```
+
+```bash
+04:45:40.573686 IP 78.149.209.110.27782 > 172.30.0.144.443: Flags [.], ack 
+278239097, win 28, options [nop,nop,TS val 939752277 ecr 1208058112], length 0
+    0x0000:  4500 0034 0014 0000 2e06 c005 4e8e d16e  E..4........N..n
+    0x0010:  ac1e 0090 6c86 01bb 8e0a b73e 1095 9779  ....l......>...y
+    0x0020:  8010 001c d20
+```
+
+
+This showed some HTTPS traffic, with a hex display visible on the right portion of the output (alas, it’s encrypted). Just remember—when in doubt, run the command above with the port you’re interested in, and you should be on your way.
+
+
+#### Everything on an interface
+
+Just see what’s going on, by looking at what’s hitting your interface.
+
+```bash
+tcpdump -i eth0
+```
+
+Or get all interfaces with `-i any`.
+
+#### Find traffic by IP
+
+One of the most common queries, using host, you can see traffic that’s going to or from `1.1.1.1`.
+
+
+
+```bash
+tcpdump host 1.1.1.1
+```
+
+```bash
+06:20:25.593207 IP 172.30.0.144.39270 > one.one.one.one.domain: 
+12790+ A? google.com. 
+(28) 06:20:25.594510 IP one.one.one.one.domain > 172.30.0.144.39270: 
+12790 1/0/0 A 172.217.15.78 (44)
+```
+
+#### Filtering by Source and/or Destination
+
+If you only want to see traffic in one direction or the other, you can use `src` and `dst`
+
+```
+tcpdump src 1.1.1.1
+tcpdump dst 1.0.0.1
+```
+
+
 ## Bluetooth
 
 ### Initializing and stopping the bluetooth

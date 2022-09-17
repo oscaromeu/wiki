@@ -44,7 +44,7 @@ var earth, jupiter Planet
 
 ## Initialization
 
-As with all types in Go, structs are initialized to their zero value. The zero value of a struct type is a struct with all fileds being set to their respective zero value.
+As with all types in Go, structs are initialized to their zero value. The zero value of a struct type is a struct with all fields being set to their respective zero value.
 
 <figcaption align = "left"><b>Example <a href="https://go.dev/play/p/YcWU_LWKP8S">https://go.dev/play/p/YcWU_LWKP8S</a></b></figcaption>
 
@@ -141,13 +141,11 @@ fmt.Println("Dot notation with pointer:", pmars.Gravity)
 
 In the lecture on packages, we learned that package-level identifiers are exported if they start with an uppercase letter, and internal otherwise. The same principle applies to struct fields.
 
-A struct field with a capital letter is exported and therefore accessible to users of the struct outside the package in which the struct is defined.
++ A struct field with a capital letter is exported and therefore accessible to users of the struct outside the package in which the struct is defined.
 
-All field names that do not start with a capital letter denote an internal field. Internal fields can only be accessed from within the same package.
++ All field names that do not start with a capital letter denote an internal field. Internal fields can only be accessed from within the same package.
 
-Taking our Planet struct as an example, all fields except for the fields previous and next start with an uppercase letter and hence are exported.
-
-Hence if the Planet struct was part of a library package, then any code that imports this package can access all fields except for the previous and next fields.
+Taking our Planet struct as an example, all fields except for the fields previous and next start with an uppercase letter and hence are exported. Hence if the Planet struct was part of a library package, then any code that imports this package can access all fields except for the previous and next fields.
 
 ## Comparasion
 

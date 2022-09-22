@@ -62,7 +62,12 @@ flux reconcile [command]
 ```
 
 where command can be: `alert`, `alert-provider`, `helmrelease`, `image`, `kustomization`, `receiver`, `source`.
-         
+        
+## Watch Kustomize Controller reconciliation events
+
+```
+flux get kustomizations --watch 
+```
 
 ### Examples
 

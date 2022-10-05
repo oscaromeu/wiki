@@ -138,3 +138,16 @@ and similarly to disconnect the device we can use
 ```bash
 bluetoothctl disconnect  $(bluetoothctl devices Paired | grep Device | cut -d ' ' -f 2)
 ```
+
+
+## SSH
+
+### Proxyjump
+
+```
+ssh -J internal-proxy last-host -f -N
+
+```
+## Enlaces
+
+[1] - [Tuneles proxyjump](https://sysarmy.com/blog/posts/proxyjump-tuneles-ssh/)

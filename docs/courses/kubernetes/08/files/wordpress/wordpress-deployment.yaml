@@ -43,10 +43,4 @@ spec:
                 configMapKeyRef:
                   name: bd-datos
                   key: bd_dbname
-          volumeMounts:
-            - name: wordpress-vol
-              mountPath: /var/www/html
-      volumes:
-        - name: wordpress-vol
-          persistentVolumeClaim:
-            claimName: wordpress-pvc
+

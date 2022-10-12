@@ -1,34 +1,32 @@
 # ACTIVIDAD Nº 1
 
-## TÍTULO DE LA ACTIVIDAD:  Instalación de un CMS con Helm
+## TÍTULO DE LA ACTIVIDAD: Creando un cluster de MySQL
 
 ## TEXTO DE LA ACTIVIDAD
 
-Vamos a instalar el CMS Wordpress usando Helm. Para ello, realiza los siguientes pasos:
+Siguiendo el [Ejemplo2: Despliegue de un cluster de MySQL](ejemplo2.md) de esta unidad, crea un cluster de MySQL con un primario y un secundario y realiza algunas pruebas para comrpobar su funcionamiento.
 
-1. Instala la última versión de Helm.
-2. Añade el repositorio de bitnami
-3. Busca el chart de bitnami para la instalación de Wordpress. 
-4. Busca la documentación del chart y comprueba los parámetros para cambiar el tipo de Service y el nombre del blog.
-5. Instala el chart definiendo el tipo del Service como `NodePort` y poniendo tu nombre como nombre del blog.
-6. Comprueba los Pods, ReplicaSet, Deployment y Services que se han creado.
-7. Accede a la aplicación.
+Realiza los siguientes pasos:
+
+1. Crea los ficheros yaml necesarios para definir el ConfigMap, los servicios y el StatefulSet, de manera que los volúmenes asociados tengan 2GiB de tamaño y el servicio MySQL que ejecuten los secundarios se denomine `mysql-lectura`.
+1. Crea un pod efímero que pueble la base de datos con la información que quieras.
+1. Crea un pod efímero que consulte la base de datos del secundario.
 
 Para superar la actividad deberás entregar en un fichero comprimido los siguientes pantallazos:
 
-1. Pantallazo con la búsqueda del chart con el comando `helm` (**pantallazo1.jpg**).
-2. Pantallazo donde se compruebe que se ha desplegado de forma correcta (**pantallazo2.jpg**).
-3. Pantallazo donde se vean los Pods, ReplicaSets, Deployments y Services que se han creado (**pantallazo3.jpg**).
-4. Pantallazo donde se vea el acceso al blog y se vea tu nombre como título del blog (**pantallazo4.jpg**).
+1. Pantallazo con la definición de los recursos (**pantallazo1.jpg**).
+2. Pantallazo donde se visualice que se han creado los pods, los servicios y los volúmenes (**pantallazo2.jpg**).
+3. Pantallazo donde se visualice la consulta a la base de datos (**pantallazo3.jpg**).
 
 
 ## RECURSOS
 
 * Conexión a internet
+* Los ficheros del [Ejemplo 2: Despliegue de un cluster de MySQL](ejemplo2.md).
 
 ## ¿ES OBLIGATORIO HACER ESTA ACTIVIDAD PARA SUPERAR EL CURSO? (S/N)
 
-Si
+No
 
 ## ¿ES UNA ACTIVIDAD INDIVIDUAL O DE GRUPO?
 
@@ -38,7 +36,7 @@ Individual
 
 Si
 
-### ¿Tiene que ser calificada por el tutor/a? (S/N) 
+### ¿Tiene que ser calificada por el tutor/a? (S/N)
 
 Si
 
@@ -60,4 +58,4 @@ No
 
 ## TIEMPO ESTIMADO PARA REALIZAR LA ACTIVIDAD
 
-1 hora
+2 horas

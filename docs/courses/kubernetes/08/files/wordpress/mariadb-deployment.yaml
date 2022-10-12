@@ -44,10 +44,3 @@ spec:
                 secretKeyRef:
                   name: bd-passwords
                   key: bd_rootpassword
-          volumeMounts:
-            - name: mariadb-vol
-              mountPath: /var/lib/mysql
-      volumes:
-        - name: mariadb-vol
-          persistentVolumeClaim:
-            claimName: mariadb-pvc

@@ -22,7 +22,7 @@ para que siempre tengamos el número de Pods deseado.
 
 ## Describiendo un ReplicaSet
 
-En este caso también vamos a definir el recurso de ReplicaSet en un fichero [`nginx-rs.yaml`](files/nginx-rs.yaml), por ejemplo como este:
+En este caso también vamos a definir el recurso de ReplicaSet en un fichero [`nginx-rs.yaml`](./05/files/nginx-rs.yaml), por ejemplo como este:
 
 ```yaml
 apiVersion: apps/v1
@@ -51,7 +51,7 @@ Algunos de los parámetros definidos ya lo hemos estudiado en la definición del
 * `template`: El recurso ReplicaSet contiene la definición de un Pod. Fíjate que el Pod que hemos definido en la sección `template` tiene indicado la etiqueta necesaria para que sea
 seleccionado por el ReplicaSet (`app: nginx`).
 
-![](./04/img/01-rs.png#center)
+![](./05/img/01-rs.png#center)
 
 :::info Para que el controlador `Replicaset` agrupe y gestione correctamente los Pods, las etiquetas descritas en la sección `.spec.selector.matchLabels` tienen que estar presentes en las
 etiquetas del Pod.

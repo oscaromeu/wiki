@@ -21,13 +21,13 @@ kubectl config set-context --current --namespace lab
 
 La unidad más pequeña de ejecución que puede utilizar Kubernetes es el [*Pod*](https://kubernetes.io/es/docs/concepts/workloads/pods/pod/), en inglés Pod significa "vaina", y podemos entender un Pod como una envoltura que contiene uno o varios contenedores (en la mayoría de los casos un solo contenedor). Las principales características que tiene un pod son:
 
-![](./03/img/02-pods.png#center)
+![](./02/img/02-pods.png#center)
 
 + Encapsula a uno o varios contenedores en ejecución. 
 + Tiene asignada una IP, todos los contenedores dentro del Pod comparten la misma IP y puertos. 
 + Los contenedores dentro de un Pod se pueden comunicar entre si utilizando `localhost`. 
 
-![](./03/img/03-pods.png#center)
+![](./02/img/03-pods.png#center)
 
 
 
@@ -293,7 +293,7 @@ kubectl delete pod pod-nginx
 + Cada pod puede hablar con cualquier pod de la red usando las direcciones IP; no es necesario realizar ningun tipo de NAT
 + Por defecto, dentro de un pod, las comunicaciones entre contenedores se realizan a través de localhost. 
 
-![](./03/img/041-pods.png#center)
+![](./02/img/041-pods.png#center)
 
 
 ## Configurar Pods
@@ -424,7 +424,7 @@ En algunos casos la ejecución de un solo proceso por contenedor no es la soluci
 Pod multicontenedor y ejecutar cada proceso en un contenedor, pero que puedan comunicarse entre sí como si lo estuvieran haciendo en el mismo sistema, utilizando un dispositivo de almacenamiento compartido si hiciese falta (para leer, escribir ficheros entre ellos) y compartiendo externamente una misma dirección IP. Un ejemplo típico de un Pod multicontenedor es un servidor web nginx con un servidor de aplicaciones PHP-FPM, que se implementaría mediante un solo Pod, pero
 ejecutando un proceso de nginx en un contenedor y otro proceso de php-fpm en otro contenedor.
 
-![](./03/img/pod-4.png#center)
+![](./02/img/pod-4.png#center)
 
 ### Implicaciones de múltiples contenedores en un pod
 
@@ -432,7 +432,7 @@ Todos los contenedores dentro de un pod comparten un mismo namespace de red (`ne
 
 Debido a que los puertos son compartidos, los contenedores tienen que usar puertos diferentes para exponer sus servicios. Un mismo puerto no puede ser usado al mismo tiempo por dos o más contenedores. Por ejemplo, si levantaramos 2 contenedores de `nginx` en el mismo pod obtendriamos un error al intentar desplegarlo. 
 
-![](./03/img/pod-5.png#center)
+![](./02/img/pod-5.png#center)
 
 :::info
 Cuando desplegamos un pod con más de un container, tenemos que tener la

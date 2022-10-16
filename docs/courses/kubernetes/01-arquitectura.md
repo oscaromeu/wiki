@@ -89,3 +89,20 @@ Los complementos en Kubernetes son utilizados para implementar la funcionalidade
 ### DNS
 
 El complemento DNS se utiliza CoreDNS. Su función dentro del cluster es gestionar los registros de los servicios asi como la detección y descubrimiento de los mismos. Durante la instalación de Kubernetes viene incorporado este complemento de forma predeterminada. Es estrictamente obligatorio tener esta pieza funcionando para que el cluster funciona correctamente. 
+
+
+# Enlaces
+
+
+[1] B. Muschko, CKAD Crash Course. [Online] Available: [CKAD Crash Course](https://github.com/bmuschko/ckad-crash-course) [Accessed: 16-Oct-2022].
+
+[2] B. Muschko, CKA Crash Course. [Online] Available: [CKA Crash Course](https://github.com/bmuschko/cka-crash-course) [Accessed: 16-Oct-2022].
+
+[3] B. Muschko, Certified Kubernetes Application Developer (CKAD) Study Guide. O'Reilly, 2021.
+
+[4] B. Muschko, Certified Kubernetes Application Developer (CKA) Study Guide. O'Reilly, 2022.
+
+[5] J. Domingo, Curso Kubernetes. [Online] Available [Curso Kubernetes](https://www.josedomingo.org/pledin/2022/05/curso-kubernetes/) [Accessed: 16-Oct-2022].
+
+[6] J. Domingo, J.D. Perez, A.M. Coballes, Curso Kubernetes. [Online] Available [Repositorio Curso Kubernetes](https://github.com/iesgn/curso_kubernetes_cep) [Accessed: 16-Oct-2022].
+

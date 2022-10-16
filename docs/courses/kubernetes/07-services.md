@@ -274,8 +274,6 @@ Para aprender cómo gestionamos los Services, vamos a trabajar con el Deployment
 
 TODO
 
-
-
 # Servicio DNS en Kubernetes
 
 Existe un componente de Kubernetes llamado CoreDNS, que ofrece un servidor DNS interno para que los Pods puedan resolver diferentes nombres de recursos (Services, Pods, ...) a direcciones IP.

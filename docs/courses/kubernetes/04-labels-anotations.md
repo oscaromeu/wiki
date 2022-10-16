@@ -2,7 +2,7 @@
 id: labels
 title: Labels y anotations
 sidebar_label: Labels y anotations
-sidebar_position: 4
+sidebar_position: 5
 ---
 
 ## Introducción

@@ -7,6 +7,6 @@ spec:
   ports:
   - name: service-http
     port: 80
-    targetPort: http
+    targetPort: 80
   selector:
     app: nginx

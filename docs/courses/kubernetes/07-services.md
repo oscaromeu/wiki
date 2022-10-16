@@ -13,46 +13,44 @@ Sabemos que los pods pueden comunicarse entre ellos usando sus direcciones IP pe
 
 Asumamos por un momento que tenemos algún mecánismo de resolución de nombres y obtenemos un pod al que conectarnos pero ¿que sucede si el pod escogido al azar se cae y perdemos la conexión? Es solo cuestión de tiempo que alguna mierda pase. El cliente tiene que conectarse de nuevo a otro pod. Esto parece senzillo pero no lo es especialmente en el contexto de Kubernetes en el que se generan y destruyen pods de manera constante. Las IPs de los pods son efimeras y los clientes no pueden "fiarse" de ellas. 
 
-Vemos de manera lógica que necesitamos de algo intermedio entre nuestro pod cliente y los pods. Este algo que buscamos es el objeto `Service`. Un objeto `Service` nos da un único punto de acceso a un conjunto de pods a través de una IP Virtual estable y un nombre de DNS. Dicho de otra manera, cuando creamos un servicio obtenemos un nombre de DNS asociado al servicio mediante el cuál podemos encontrar nuestros pods y un único punto de acceso a través de su IP virtual y puerto.
-
-![01-services](./07/img/01-services.png)
-
-([Services](https://kubernetes.io/docs/concepts/services-networking/service/))
+Vemos de manera lógica que necesitamos de algo intermedio entre nuestro pod cliente y los pods. Este algo que buscamos es el objeto `Service`.
 
 ## ¿Qué es un servicio?
 
-Un servicio "expone" a un conjunto de pods:
+Para dar solución a la problemática planteada se ha creado el objeto `Service`. El `Service` es la pieza utilizada como único punto de acceso hacia un grupo de Pods. Sus principales características son:
 
-+ Tiene una IP virtual estable y una dirección de dominio asociada.
+![01-services](./07/img/01-services.png)
 
++ Constituye una IP Virtual estable y una dirección de dominio para acceder a un grupo de Pods.
 + La forma de asociar Pods a un `Service` es a través de las etiquetas.
-
++ Las direcciones IP de los Pods constituyen el listado de Endpoints. Un Endpoint es una IP
 + Puerto y protocolo asociada a la IP virtual.
-
 + Se utiliza para la parte de autodescubrimiento mediante el DNS interno del cluster.
+
 
 ![02-services](./07/img/02-services.png)
 
-:::info
-Si el Deployment que hemos creado tiene más de un Pod asociado, el Service que representa el acceso a esta aplicación **balanceará la carga** entre los Pods con una política Round Robin.
-:::
 
+([Services](https://kubernetes.io/docs/concepts/services-networking/service/))
 
+El componente `kube-proxy`siempre está al tanto de los cambios realizados sobre los objetos de tipo `Service`. Para cada `Service`, `kube-proxy` configura nuevas relgas en el registro de IPs del nodo para capturar el tráfico y luego dirigirlo hacia un Pod. 
 
-:::info
-Cuando tenemos más de un Pod ofreciendo el mismo servicio, realmente tenemos un clúster y es importante distinguir entre servicios sin estado (*stateless*) o con estado (*stateful*)). En un servicio sin estado (por ejemplo, un servidor web que sirva contenido estático), las peticiones son independientes y se pueden servir por diferentes nodos sin problema, aunque en el caso de un servidor web, deberíamos asegurarnos previamente de que el directorio con los datos es el mismo. Un servicio de este tipo lo podemos escalar con un despliegue sin problema. Por otra parte, si el servicio tiene estado (por ejemplo, un servidor de bases de datos), una petición puede depender de otra anterior, por lo que puede haber incoherencias si simplemente creamos un cluster de nodos iguales. En este tipo de servicios, es necesaria una configuración adicional que controle el estado y que haga que los datos que sirve cada Pod son coherentes entre sí. Veremos un ejemplo de este tipo de servicios en el módulo 9 del curso.
-:::
-
-
-:::info
-En el cluster existirá un componente que nos ofrece un **servicio DNS**. Cada vez que creamos un Service se actualizará el DNS para resolver el nombre que hemos asignado al Service con la IP virtual (CLUSTER-IP) que se le ha asignado.
-:::
+Existe un Pod `kube-proxy` corriendo en cada nodo del cluster para llevar a cabo esta tarea.
 
 ## Tipos de Services
+La forma de poder a las aplicaciones puede ser
+
++ Desde dentro del cluster
++ Desde fuera del cluster
+
+veamos los diferentes tipos de servicios disponibles en Kubernetes
 
 ### ClusterIP
 
 Solo se permite el acceso interno a un Service de este tipo. Es decir, si tenemos un despliegue con una aplicación a la que no es necesario acceder desde el exterior, crearemos un Service de este tipo para que otras aplicaciones puedan acceder a ella (por ejemplo, una base de datos). Es el tipo por defecto. Si deseamos seguir accediendo desde el exterior, para hacer pruebas durante la fase de desarrollo podemos seguir utilizando la instrucción `kubectl port-forward`.
+
+
+![02-services](./07/img/05-clusterip.png)
 
 
 ### NodePort
@@ -71,21 +69,13 @@ En este sección vamos a ver los siguientes puntos:
 + Como listar servicios y obtener información acerca de los mismos
 
 
-:::warning Nota
-
-Por defecto ejecutaremos todos los comandos dentro del namespace `curso-k8s`. Podemos setear de forma permanente siempre en el contexto de la sessión actual de la shell el namespace por defecto en el que se van a ejecutar todos los comandos de `kubectl` mediante:
-
-```
-$ kubectl config set-context --current --namespace curso-k8s
-```
-
-:::
-
 ## Crear un servicio tipo ClusterIP
 
-Lo primero que vamos a hacer es deplegar un deployment de nginx usando el fichero yaml: [`nginx-deployment.yaml`](../modulo5/files/nginx-deployment.yaml):
+Lo primero que vamos a hacer es deplegar un deployment de nginx usando el fichero yaml: [`nginx-deployment.yaml`](./07/files/nginx-deployment.yaml):
 
-    kubectl apply -f nginx-deployment.yaml
+```  
+kubectl apply -f nginx-deployment.yaml
+```
 
 Por lo tanto tenemos dos Pods ofreciendo el servidor web nginx, a los que queremos acceder y poder balancear la carga. 
 
@@ -95,28 +85,24 @@ NAME    READY   UP-TO-DATE   AVAILABLE   AGE
 nginx   2/2     2
 ```
 
-Como sabemos podemos crear objetos en kubernetes de manera imperativa o declarativa. Para un deployment que ya tenemos corriendo en el cluster podemos usar el comando `expose deployment` para exponer los pods que hay por debajo de ese deployment de la siguiente manera:
+Como sabemos podemos crear objetos en kubernetes de manera imperativa o declarativa. Usando el comando `create service` generamos un nuevo objeto en el cluster de tipo `Service`. Cuando usamos este comando es importante indicar el tipo de servicio que queremos usar y opcionalmente el mapeo de puertos. Por ahora no nos preocupamos del mapeo de puertos lo veremos más adelante.
 
-  ```bash
-    $ kubectl expose deployment/nginx --port=80 --type=ClusterIP
-  ```
+```bash
+$ kubectl create service clusterip nginx-service --tcp=80:80
+```
 
-:::info Nota
+En lugar de crear el servicio como un objeto independiente, podemos exponer el pod o el deployment con un único comando. El comando `run` proporciona la opción `--expose` el cuál nos permite crear un pod y su correspondiente `Service` con las etiquetas correctamente configuradas para balancear el tráfico 
 
-De hecho, existen dos maneras más de crear un `Service` de manera imperativa.
+```bash
+$ kubectl run nginx --image=nginx --restart=Never --port=80 --target-port=80
+```
 
-+ Usando el comando `create service` generamos un nuevo objeto en el cluster de tipo `Service`. Cuando usamos este comando es importante indicar el tipo de servicio que queremos usar y opcionalmente el mapeo de puertos. Por ahora no nos preocupamos del mapeo de puertos lo veremos más adelante.
 
-  ```bash
-  $ kubectl create service clusterip nginx-service --tcp=80:80
-  ```
+Para un deployment que ya tenemos corriendo en el cluster podemos usar el comando `expose deployment` para exponer los pods que hay por debajo de ese deployment de la siguiente manera:
 
-+ También podemos exponer un pod o un deployment con un único comando. El comando `run` proporciona la opción `--expose` el cuál nos permite crear un pod y su correspondiente `Service` con las etiquetas correctamente configuradas para balancear el tráfico 
-
-  ```bash
-  $ kubectl run nginx --image=nginx --restart=Never --port=80 --target-port=80
-  ```
-:::
+```bash
+$ kubectl expose deployment/nginx --port=80 --type=ClusterIP
+```
 
 En general lo que hacemos es usar el modelo declarativo y describir las características del Service en un fichero yaml [`nginx-srv.yaml`](files/nginx-srv.yaml):
 
@@ -153,12 +139,12 @@ Vamos a describir lo que hemos hecho:
 Utilizamos el comando `apply` para poner en funcionamiento el ejemplo anterior
 
 ```bash
-$ kubectl apply -f nginx-srv.yaml
+$ kubectl apply -f nginx-clusterip.yaml
 ```
 
-## Examinando los servicios creados
+### Examinando los servicios creados
 
-### Listar Servicios
+#### Listar Servicios
 
 Podemos listar los servicios que tenemos con el siguiente comando:
 
@@ -174,7 +160,7 @@ La salida del comando nos indica el tipo de servicio, la IP virtual asociada y l
 La IP asociada a un servicio de tipo `ClusterIP` es solamente accesible desde dentro del cluster.
 :::
 
-### Obtener información detallada del servicio
+#### Obtener información detallada del servicio
 
 El comando `describe` nos permite obtener más información del servicio creado.
 
@@ -197,130 +183,63 @@ Session Affinity:  None
 Events:            <none>
 ```
 
-### Testeando el servicio desde dentro del cluster
+![06-portmapping](./07/img/06-portmapping.png#center)
 
-Podemos enviar peticiones desde dentro del cluster de diferentes formas:
+#### Acceder al servicio creado
 
-+ Crear un pod que envie peticiones a la IP de servicio y examinar los logs de salida.
-
-+ Conectarnos por ssh a uno de los nodos del cluster y utilizar el comando `curl`
-
-+ Crear un pod temporal que disponga del comando curl y ejecutarlo desde dentro o bien usando el comando `kubectl exec`
-
-Vamos a ver la última opción y así veremos como ejecutar comandos en pods que tenemos corriendo en el cluster.
-
-## Crear un servicio de tipo NodePort
-
-Para aprender cómo gestionamos los Services, vamos a trabajar con el Deployment de nginx ([`nginx-deployment.yaml`](../modulo5/files/nginx-deployment.yaml)) y el Service NodePort ([`nginx-srv.yaml`](files/nginx-srv.yaml)) para acceder a los Pods de este despliegue desde el exterior.
-
-### Creamos el Deployment
-
-El primer paso sería crear el Deployment de nginx:
-
-    kubectl apply -f nginx-deployment.yaml
-
-### Creamos el Service
-
-A continuación vamos a crear el Service de tipo NodePort que nos permitirá acceder al servidor nginx.
-
-    kubectl apply -f nginx-srv.yaml
-
-Para ver los Services que tenemos creado:
-
-    kubectl get services
-
-Recuerda que si usamos `kubectl get all` también se mostrarán los Services.
-
-Antes de acceder a la aplicación podemos ver la información más detallada del Service que acabamos de crear:
-
-    kubectl describe service/nginx
-    Name:                     nginx
-    ...
-    Selector:                 app=nginx
-    Type:                     NodePort
-    ...
-    IP:                       10.110.81.74
-    Port:                     service-http  80/TCP
-    TargetPort:               http/TCP
-    NodePort:                 service-http  32717/TCP
-    Endpoints:                172.17.0.3:80,172.17.0.4:80
-    ...
-
-Podemos ver la etiqueta de los Pods a los que accede (`Selector`). El tipo de Service (`Type`). La IP virtual que ha tomado (CLUSTER-IP) y que es accesible desde el cluster (`IP`). El puerto por el que ofrece el Service (`Port`). El puerto de los Pods a los que redirige el tráfico (`TargetPort`). Al ser un service de tipo NodePort nos da información del puerto que se asignado para acceder a la aplicación (`NodePort`). Y por último, podemos ver las IPs de los Pods que ha seleccionado y sobre los que balanceará la carga (`Endpoints`).
-
-### Accediendo a la aplicación
-
-Vemos el Service que hemos creado:
-
-    kubectl get services
-    ...
-    nginx        NodePort    10.110.81.74   <none>        80:32717/TCP   32s
-
-Observamos que se ha asignado el puerto 32717 para el acceso, por lo tanto si desde un navegador accedemos a la IP del nodo master y a este puerto podremos ver la aplicación.
-
-Las IPs de los nodos son las siguientes:
+Existen varias formas de comprobar si el servicio está dirigiendo el tráfico correctamente hacia los Pods. EN esta ocasión se utilizará el comando Port-forward, que permitirá enviar el tráfico desde el puerto de la máquina local hacia el servicio expuesto por la aplicación. 
 
 ```
-  host01 ip => "192.168.61.11"
-  host02 ip => "192.168.61.12"
-  host03 ip => "192.168.61.13"
+$ kubectl get svc
+NAME         TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+...
+nginx        ClusterIP   10.96.152.46   <none>        80/TCP    10m
+$ kubectl port-forward svc/nginx 8080:80
+Forwarding from 127.0.0.1:8080 -> 80
+Forwarding from [::1]:8080 -> 80
 ```
 
-Y ya podemos acceder desde un navegador web:
+Una vez iniciado el comando podemos abrir el navegador web y acceder a [](http://localhost:8080) también podriamos usar el comando curl y obtendriamos el mismo resultado. 
 
-![Acceso a nginx](./07/img/nginx.png)
+Recordar que el servicio de tipo `ClusterIP` solamente es accesible desde dentro del cluster. Para demostrar vamos a poner a correr un pod con la imagen de busybox y ejecutaremos wget para testear el acceso a la aplicación.
 
+```
+$ kubectl run busybox --image=busybox --restart=Never -it -- /bin/sh
+If you don't see a command prompt, try pressing enter.
+/ # wget -O- 10.96.152.46:80
+Connecting to 10.96.152.46:80 (10.96.152.46:80)
+writing to stdout
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
 
-## Laboratorio
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
 
-:::tip Ejercicios
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+-                    100% |*******************************************************************************************************|   612  0:00:00 ETA 
+written to stdout
+/ #
+```
 
-1. Crear un servicio de tipo `ClusterIP` para un despliegue de MariaDB. Podeis usar como referencia el siguiente fichero [`mariadb-deployment.yaml`](files/mariadb-deployment.yaml)
-
-  <details>
-    <summary>Ver Solución</summary>
-  
-  En esta ocasión vamos a desplegar una base de datos MariaDB. En este caso no vamos a necesitar acceder a la base de datos desde el exterior, pero necesitamos que los Pods de otro despliegue puedan acceder a ella. Por lo tanto vamos a crear un Service de tipo ClusterIP.
-  
-  Para el despliegue de MariaDB vamos a usar el fichero [`mariadb-deployment.yaml`](files/mariadb-deployment.yaml). Puedes comprobar que en la definición del contenedor hemos añadido la sección `env` que nos permite establecer variables de entorno para configurar el contenedor (los estudiaremos en el siguiente módulo).
-  
-  Para la creación del Service utilizamos el fichero [`mariadb-srv.yaml`](files/mariadb-srv.yaml).
-  
-  Para la creación del Deployment y el Service vamos ejecutando las siguientes instrucciones:
-  
-      kubectl apply -f mariadb-deployment.yaml
-      kubectl apply -f mariadb-srv.yaml
-  
-  Comprobamos el Service creado:
-  
-      kubectl get services
-      mariadb      ClusterIP   10.106.60.233   <none>        3306/TCP       2m22s
-  
-      kubectl describe service/mariadb
-      Name:              mariadb
-      ...
-      Selector:          app=mariadb
-      Type:              ClusterIP
-      ...
-      IP:                10.106.60.233
-      Port:              service-bd  3306/TCP
-      TargetPort:        db-port/TCP
-      Endpoints:         172.17.0.5:3306
-      ...
-  
-  Podemos comprobar que no se ha mapeado un puerto aleatorio para que accedamos usando la IP del nodo master. Los Pods que accedan a la IP 10.106.60.233 o al nombre `mariadb` y al puerto 3306 estarán accediendo al Pod (172.17.0.5:3306) del despliegue de mariadb.
-  
-  ## Eliminando los servicios
-  
-  Por ejemplo para borrar el servicio `mariadb`, ejecutaríamos:
-  
-      kubectl delete service mariadb  
-  
-  </details>
-:::
-
-
-## ¿Qué es lo que realmente esta sucediendo?
+### ¿Qué es lo que realmente esta sucediendo?
 
 
 En los nodos dónde se ejecutan los pods corre un proxy el cuál intercepta el tráfico, por defecto este componente es conocido como "kube-proxy". En realidad este componente no es un proxy en si mismo sino que convierte a los nodos en un proxy. Para conseguir que los nodos funcionen como un proxy se usan funcionalidades del kernel de linux como IPTables o IPVS segun el modo en que este funcionando y esto depende de cómo se haya instalado o de la distribución usada de k8s.
@@ -348,151 +267,64 @@ root@host01: iptables-save | grep 'default/nginx:service-http'
 -A KUBE-SVC-J3IQXGWMHP6USLHH -m comment --comment "default/nginx:service-http" -j KUBE-SEP-P7TMJ4U5XB3DQ5CE
 ```
 
+
+## Crear un servicio de tipo NodePort
+
+Para aprender cómo gestionamos los Services, vamos a trabajar con el Deployment de nginx ([`nginx-deployment.yaml`](../modulo5/files/nginx-deployment.yaml)) y el Service NodePort ([`nginx-srv.yaml`](files/nginx-srv.yaml)) para acceder a los Pods de este despliegue desde el exterior.
+
+TODO
+
+
+
 # Servicio DNS en Kubernetes
 
 Existe un componente de Kubernetes llamado CoreDNS, que ofrece un servidor DNS interno para que los Pods puedan resolver diferentes nombres de recursos (Services, Pods, ...) a direcciones IP.
 
 Cada vez que se crea un nuevo recurso Service se crea un registro de tipo A con el nombre:
 
-    <nombre_servicio>.<nombre_namespace>.svc.cluster.local.
+```
+<nombre_servicio>.<nombre_namespace>.svc.cluster.local.
+```
 
 ## Comprobemos el servidor DNS
 
-Partimos del punto anterior donde tenemos creados los dos Services:
+Partimos del punto anterior donde tenemos creado el servicio nginx
 
-    kubectl get services
-    mariadb      ClusterIP   10.106.60.233   <none>        3306/TCP
-    nginx        NodePort    10.110.81.74    <none>        80:32717/TCP
+```
+$ kubectl get svc
+NAME         TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.96.0.1      <none>        443/TCP   3h7m
+nginx        ClusterIP   10.96.68.136   <none>        80/TCP    18m
+```
 
 Para comprobar el servidor DNS de nuestro cluster y que podemos resolver los nombres de los distintos Services, vamos a usar un Pod ([`busybox.yaml`](files/busybox.yaml)) creado desde una imagen `busybox`.  Es una imagen muy pequeña pero con algunas utilidades que nos vienen muy bien:
 
-    kubectl apply -f busybox.yaml
+```
+kubectl apply -f busybox.yaml
+```
 
 ¿Qué servidor DNS está configurado en los Pods que estamos creando? Podemos ejecutar la siguiente instrucción para comprobarlo:
 
-    kubectl exec -it busybox -- cat /etc/resolv.conf
-    nameserver 10.96.0.10
-    search default.svc.cluster.local svc.cluster.local cluster.local
+```
+kubectl exec -it busybox -- cat /etc/resolv.conf
+nameserver 10.96.0.10
+search default.svc.cluster.local svc.cluster.local cluster.local
+```
 
 * El servidor DNS (componente coreDNS) tiene asignado la IP del cluster 10.96.0.10.
 * Podemos utilizar el nombre corto del Service, porque buscará el nombre del host totalmente cualificado usando los dominios indicados en el parámetro `search`. Como vemos el primer nombre de dominio es el que se crea con los Services: `default.svc.cluster.local` (recuerda que el *namespace* que estamos usando es `default`).
 
-Vamos a comprobar que realmente se han creado dos registros A para cada uno de los Service, haciendo consultas DNS:
+Vamos a comprobar que realmente se han creado un registro de tipo A para el servicio de nginx, haciendo consultas DNS:
 
-    kubectl exec -it busybox -- nslookup nginx
-    Server:		10.96.0.10
-    Address:	10.96.0.10:53
+```
+kubectl exec -it busybox -- nslookup nginx
+Server:		10.96.0.10
+Address:	10.96.0.10:53
 
-    Name:	nginx.default.svc.cluster.local
-    Address: 10.110.81.74
-
-Vemos que ha hecho la resolución del nombre `nginx` con la IP correspondiente a su servicio. Y con el Service mariadb también lo podemos hacer:
-
-    kubectl exec -it busybox -- nslookup mariadb
-    Server:		10.96.0.10
-    Address:	10.96.0.10:53
-
-    Name:	mariadb.default.svc.cluster.local
-    Address: 10.106.60.233
-
-También podemos comprobar que usando el nombre podemos acceder al servicio:
-
-    kubectl exec -it busybox -- wget http://nginx
-    Connecting to nginx (10.110.81.74:80)
-    saving to 'index.html'
-    ...
-
-Podemos concluir que, cuando necesitemos acceder desde alguna aplicación desplegada en nuestro cluster a otro servicio ofrecido por otro despliegue, **utilizaremos el nombre que hemos asignado a su Service de acceso**. Por ejemplo, si desplegamos un Wordpress y un servidor de base de datos mariadb, y creamos dos Services: uno de tipo NodePort para acceder desde el exterior al CMS, y otro, que llamamos `mariadb` de tipo ClusterIP para acceder ala base de datos, cuando tengamos que configurar el Wordpress para indicar la dirección de la base de datos, pondremos `mariadb`.
-
-
-# Ingress Controller
-
-Hasta ahora tenemos dos opciones principales para acceder a nuestras aplicaciones desde el exterior:
-
-1. Utilizando Services del tipo NodePort: Esta opción no es muy viable para entornos de producción ya que tenemos que utilizar puertos aleatorios desde 30000-40000.
-2. Utilizando Services del tipo LoadBalancer: Esta opción sólo es válida si trabajamos en un proveedor Cloud que nos ofrece un balanceador de carga para cada una de las aplicaciones, en cloud público puede ser una opción muy cara.
-
-La solución puede ser utilizar un [Ingress controller](https://kubernetes.io/docs/concepts/services-networking/ingress/) que nos permite utilizar un proxy inverso (HAproxy, nginx, traefik,...) que por medio de reglas de encaminamiento que obtiene de la API de Kubernetes, nos permite el acceso a nuestras aplicaciones por medio de nombres.
-
-![ingress](./07/img/ingress.png)
-
-## Instalación de Ingress Controller en minikube
-
-Cuando hacemos una instalación de minikube el componente de Ingress Controller no viene instalada por defecto. minikube nos ofrece un conjunto de *addons* que al activarlos nos instalan un determinado componente que nos ofrece una funcionalidad adicional. Para ver los *addons* que nos ofrece minikube podemos ejecutar:
-
-    minikube addons list
-
-Para activar el Ingress Controller ejecutamos:
-
-    minikube addons enable ingress
-
-Para comprobar si tenemos instalado el componente, podemos visualizar los Pods creados en el *namespace* `ingress-nginx`. Este espacio de nombre se ha creado para desplegar el controlador de ingress Por lo tanto al ejecutar:
-
-    kubectl get pods -n ingress-nginx 
-    ...
-    ingress-nginx-controller-558664778f-shjzp   1/1     Running     0          
-    ...    
-
-Debe aparece un Pod que se llama `ingress-nginx-controller-...`, si es así, significa que se ha instalado un Ingress Controller basado en el proxy inverso nginx.
-
-## Describiendo el recurso Ingress
-
-Una vez instalado el componente Ingress Controller, ya podemos definir un recurso Ingress en un fichero yaml. Para ello vamos a trabajar con el despliegue y el Service que hemos creado de nginx.
-
-El recurso Ingress para acceder a nuestro despliegue de nginx lo tenemos en el fichero [`ingress.yaml`](file/ingress.yaml):
-
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: nginx
-spec:
-  rules:
-  - host: www.example.org
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: nginx
-            port:
-              number: 80
+Name:	nginx.default.svc.cluster.local
+Address: 10.110.81.74
 ```
 
-Hemos indicado el tipo de recurso Ingress (`kind`) y le hemos puesto un nombre (`name`). A continuación en la especificación del recurso vamos a poner una regla que relaciona un nombre de host con un Service que me permita el acceso a una aplicación:
+Vemos que ha hecho la resolución del nombre `nginx` con la IP correspondiente a su servicio.
 
-* `host`: Indicamos el nombre de host que vamos a usar para el acceso. Este nombre debe apuntar a la ip del nodo master.
-* `path`: Indicamos el path de la url que vamos a usar, en este caso sería la ruta raíz: `/`. Esto nos sirve por si queremos servir la aplicación en una ruta determinada, por ejemplo: `www.example.org/app1`.
-* `pathType`: No es importante, nos permite indicar cómo se van a trabajar con las URL. 
-* `backend`: Indicamos el Service al que vamos a acceder. En este caso indicamos el nombre del Service (`service/name`) y el puerto del Service (`service/port/number`).
-
-Cuando se crea el recurso, y accedamos al nombre indicado, un proxy inverso redirigirá las peticiones HTTP a la IP y al puerto del Service correspondiente. **Nota: Utilizando Ingress no es necesario que los Services sean de tipo NodePort para acceder a la aplicación desde el exterior**.
-
-## Gestionando el recurso Ingress
-
-Para crear el recurso Ingress:
-
-    kubectl apply -f ingress.yaml
-
-Y podemos ver el recurso Ingress que hemos creado:
-
-    kubectl get ingress
-
-Y obtener información detallada del recurso con:
-
-    kubectl describe ingress/nginx
-
-## Accediendo a la aplicación
-
-Como no tenemos un servidor DNS que nos permita gestionar los nombres que vamos a utilizar para el acceso a las aplicaciones, vamos a usar resolución estática. Para ello como `root` añadimos una nueva línea en el fichero `/etc/hosts`, indicando el nombre (`www.example.org`) y la ip a la que corresponde, la ip del nodo master:
-
-    192.168.39.222  www.example.org
-
-Y ya podemos acceder a la aplicación usando el nombre:
-
-![ingress](./07/img/ingress2.png)
-
-## Vídeo
-
-[https://www.youtube.com/watch?v=X2dW9UbfU88](https://www.youtube.com/watch?v=X2dW9UbfU88)
+Podemos concluir que, cuando necesitemos acceder desde alguna aplicación desplegada en nuestro cluster a otro servicio ofrecido por otro despliegue, **utilizaremos el nombre que hemos asignado a su Service de acceso**. 

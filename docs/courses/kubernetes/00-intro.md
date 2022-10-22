@@ -84,7 +84,7 @@ Para crear un objeto a través de un fichero YAML existen cuatro elementos que n
 |`metadata`| Información para identificar de forma única al objeto.|
 |`spec`| Descripción del estado que se desea que obtenga el objeto dentro del cluster.|
 
-## Gestión imperativa
+### Gestión imperativa
 
 A través de la forma imperativa Kubectl indica la acción que debe realizarse en cada comando. p.ej:
 + `kubectl create deployment <deployment-name>` para crear un objeto Deployment.
@@ -142,3 +142,107 @@ apiservices                                    apiregistration.k8s.io/v1        
 controllerrevisions                            apps/v1                                true         ControllerRevision
 ...
 ```
+
+## API fundamentals
+
+### Uses of Kubernetes API
+
+The Kubernetes API is the core of Kubernetes. The API is the remote interface that enables users to create, configure, and delete Kubernetes objects. It allows developers to extend Kubernetes by creating controllers that drive the system. The controllers are responsible for things like replication, scaling, and rollout of new versions.
+
+The Kubernetes API can be used to deploy applications, pull images from the registry, or even monitor cluster state. In addition, it can also be used for performing rolling upgrades and managing network policies.
+
+The API provides programmatic access to all the features in Kubernetes. With it, developers can automate the deployment of applications, manage workloads, or access information about the cluster. In addition, familiarity with the API helps one know how to best use Kubernetes and kubectl commands to manage pods, services, replication controllers, etc., without needlessly typing commands.
+
+Verify the currently available Kubernetes API versions on the cluster:
+
+```bash
+kubectl api-version
+```
+
+Use the `--v` flag to set a verbosity level. This will allow you to see the request/responses against the Kubernetes API:
+
+```
+kubectl get pods --v=8
+```
+
+Use the `kubectl proxy` command to proxy local requests on port 8001 to the Kubernetes API:
+
+```
+kubectl proxy --port=8001
+```
+
+Open up another terminal by clicking the + button and select Open New Terminal.
+
+Send a GET request to the Kubernetes API using curl:
+
+```
+curl -X GET http://localhost:8001
+```
+
+You can explore the OpenAPI definition file to see complete API details.
+
+```
+curl localhost:8001/openapi/v2
+```
+
+Send a GET request to list all pods in the environment:
+
+```
+curl -X GET http://localhost:8001/api/v1/pods
+```
+
+Use jq to parse the json response:
+
+```
+curl -X GET http://localhost:8001/api/v1/pods | jq .items[].metadata.name
+```
+
+You can scope the response to a particular namespace:
+
+```
+curl -X GET http://localhost:8001/api/v1/namespaces/myproject/pods
+```
+
+Get more details on a particular pod within the myproject namespace:
+
+```
+curl -X GET http://localhost:8001/api/v1/namespaces/myproject/pods/my-two-container-pod
+```
+
+Export the manifest associated with my-two-container-pod in json format:
+
+```
+kubectl get pods my-two-container-pod -o json | jq 'del(.metadata.namespace,.metadata.resourceVersion,.metadata.uid) | .metadata.creationTimestamp=null' > podmanifest.json
+```
+
+Within the manifest, replace the 1.13 version of alpine with 1.14:
+
+```
+sed -i 's|nginx:1.13-alpine|nginx:1.14-alpine|g' podmanifest.json
+```
+
+Update/Replace the current pod manifest with the newly updated manifest:
+
+```
+curl -X PUT http://localhost:8001/api/v1/namespaces/myproject/pods/my-two-container-pod -H "Content-type: application/json" -d @podmanifest.json
+```
+
+
+You've upgraded the version of alpine in the my-two-container-pod to 1.14. Now, patch the current pod with an even newer container image, 1.15:
+
+```
+curl -X PATCH http://localhost:8001/api/v1/namespaces/myproject/pods/my-two-container-pod -H "Content-type: application/strategic-merge-patch+json" -d '{"spec":{"containers":[{"name": "server","image":"nginx:1.15-alpine"}]}}'
+```
+
+Delete the current pod by sending the DELETE request method:
+
+```
+curl -X DELETE http://localhost:8001/api/v1/namespaces/myproject/pods/my-two-container-pod
+```
+
+Verify the pod is in Terminating status by running kubectl get pods. Once it's terminated, you can verify the pod no longer exists:
+
+```
+curl -X GET http://localhost:8001/api/v1/namespaces/myproject/pods/my-two-container-pod
+```
+

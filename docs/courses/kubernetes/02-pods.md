@@ -29,6 +29,36 @@ La unidad más pequeña de ejecución que puede utilizar Kubernetes es el [*Pod*
 
 ![](./02/img/03-pods.png#center)
 
+## Pod Creation Flow
+
+## Maneras de crear objetos en K8s
+
+### Imperativa
+
+```
+$ kubectl create namespace hola
+$ kubectl run nginx --image=nginx -n hola
+$ kubectl edit pod/nginx -n hola
+```
+
+### Declarativa
+
+```
+$ vim ngix-pod.yaml
+$ kubectl apply -f ngix-pod.yaml
+$ kubectl delete -f ngix-pod.yaml
+```
+
+### Hybrida
+
+```
+$ kubectl run nginx --image=nginx --dry-run=client -o yaml > ngix-pod.yaml
+$ vim ngix-pod.yaml
+$ kubectl create -f ngix-pod.yaml
+```
+
+
+
 
 
 ## Crear un pod a partir de un fichero YAML
@@ -217,8 +247,6 @@ La fase de un Pod es simple, se trata de un resumen de alto nivel donde se indic
     + Indica que por alguna razón no se puede obtener el estado del Pod
     + Si en alguna ocasión encontramos esta fase en un Pod, es síntoma de que hay un error en la comunicación del propio host con el Pod
 
-
-
 Los Pods realmente nunca se paran y se inician, sólo se crean y se destruyen Kubernetes adopta la misma filosofía que el uso de Docker puro, sale más barato
 destruir y crear de nuevo :)
 
@@ -233,6 +261,14 @@ Posíblemente observaremos otros estados del Pod, que no forman explícitamente 
     + Indica que el contenedor dentro del Pod está siendo creado
 
 
+```
+$ kubectl describe pods nginx | grep Status:
+Status: Running
+```
+
+```
+$ kubectl get pods nginx -o yaml
+```
 
 ```
 $ kubectl get pod pod-nginx --output custom-columns=NAME:metadata.name,STATUS:status.phase,NODE_IP:status.hostIP,POD_IP:status.
@@ -411,7 +447,6 @@ La salida muestra los valores de las variables de entorno HOSTNAME y KUBERNETES_
 command-demo
 tcp://10.3.240.1:443
 ```
-
 
 ## Pod con un solo contenedor
 

@@ -57,17 +57,17 @@ metadata:
     app: nginx
   name: nginx
 spec:
-  replicas: 1
+  replicas: 1                  # Número de replicas
   revisionHistoryLimit: 2
   selector:
     matchLabels:
-      app: nginx
+      app: nginx                # selección de los pods para este deployment
   strategy:
     type: RollingUpdate
   template:
     metadata:
       labels:
-        app: nginx
+        app: nginx              # Etiquetas de los pods
     spec:
       containers:
       - image: nginx:1.14.2
@@ -86,7 +86,6 @@ La creación de un Deployment crea un ReplicaSet y los Pods correspondientes. Po
 * `RollingUpdate`: va creando los nuevos Pods, comprueba que funcionan y se eliminan los antiguos; es la opción por defecto.
 
 Además, hemos introducido un nuevo parámetro al definir el contenedor del pod: con el parámetro `ports` hemos indicado el puerto que expone el contenedor (`containerPort`) y le hemos asignado un nombre (`name`).
-
 
 ### Actualización de un Deployment (*rollout* y *rollback*)
 
@@ -114,6 +113,15 @@ $ kubectl apply -f nginx-deployment.yaml
 
 deploymenyts.apps/nginx created
 ```
+
+:::info
+$ kubectl create deployment my-deploy --image=nginx --replicas=3↵
+ --dry-run=client -o yaml > deploy.yaml
+$ vim deploy.yaml
+$ kubectl create -f deploy.yaml
+deployment.apps/my-deploy created
+
+:::
 
 Listamos los Deployments, los ReplicaSet y los Pods existentes en el cluster
 
@@ -293,22 +301,6 @@ REVISION  CHANGE-CAUSE
 3         Tercer despliegue. Actualizamos a la versión 1.23
 4         Primer despliegue. Desplegamos versión 1.14.2
 ```
-
-
-## Gestionando los Deployment
-
-### Creación del Deployment
-
-Cuando creamos un Deployment, se creará un ReplicaSet asociado, que creará y controlará los Pods que hayamos indicado.
-
-kubectl apply -f nginx-deployment.yaml
-kubectl get deploy,rs,pod
-
-Para ver los recursos que hemos creado también podemos utilizar la instrucción:
-
-kubectl get all
-
-Esta orden muestra los Deployments, ReplicaSets, Pods y Services que tenemos creados en el cluster. Los Services lo estudiaremos en el siguiente módulo.
 
 ## Escalado de los Deployments
 

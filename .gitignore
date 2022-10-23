@@ -22,3 +22,5 @@ yarn-error.log*
 docs/kubernetes/misc
 
 docs/courses/kubernetes/misc/*
+*.crt
+*.key

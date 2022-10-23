@@ -155,6 +155,67 @@ The API provides programmatic access to all the features in Kubernetes. With it,
 
 Verify the currently available Kubernetes API versions on the cluster:
 
+:::info
+
+```
+$ kubectl config view --minify -oyaml | yq '.clusters[].cluster.server'
+https://127.0.0.1:34591
+
+
+curl -k $(kubectl config view --minify -oyaml | yq ".clusters[].cluster.server")/version 
+
+{
+  "major": "1",
+  "minor": "24",
+  "gitVersion": "v1.24.0",
+  "gitCommit": "4ce5a8954017644c5420bae81d72b09b735c21f0",
+  "gitTreeState": "clean",
+  "buildDate": "2022-05-19T15:39:43Z",
+  "goVersion": "go1.18.1",
+  "compiler": "gc",
+  "platform": "linux/amd64"
+}
+```
+:::
+
+Observad que si intentamos obtener un recurso que no sea version llamando a la api mediante curl este nos va a devolver el siguiente mensaje de error
+
+```
+$ curl -k $(kubectl config view --minify -oyaml | yq ".clusters[].cluster.server")/api/v1/pods     
+{
+  "kind": "Status",
+  "apiVersion": "v1",
+  "metadata": {},
+  "status": "Failure",
+  "message": "pods is forbidden: User \"system:anonymous\" cannot list resource \"pods\" in API group \"\" at the cluster scope",
+  "reason": "Forbidden",
+  "details": {
+    "kind": "pods"
+  },
+  "code": 403
+}%
+```
+
+Para poder usar curl debemos especificar en la petición los certificados. Por ahora vamos a usar un proxy para poder acceder a la API
+
+```bash
+$ kubectl proxy                                                                          
+Starting to serve on 127.0.0.1:8001
+```
+
+Y con esto ya podemos lanzar peticiones a la API
+
+```
+$ curl -s http://localhost:8001/apis -k | grep "name"
+      "name": "apiregistration.k8s.io",
+      "name": "apps",
+      "name": "events.k8s.io",
+      "name": "authentication.k8s.io",
+      "name": "authorization.k8s.io",
+      "name": "autoscaling",
+```
+
+
 ```bash
 kubectl api-version
 ```

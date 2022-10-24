@@ -2,8 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: my-nginx
-  name: my-nginx
+    app: nginx
+  name: nginx
 spec:
   replicas: 1
   revisionHistoryLimit: 10

@@ -3,6 +3,7 @@ id: state_persistence
 title: Persistencia
 sidebar_label: Persistencia
 sidebar_position: 10
+draft: true
 ---
 
 ## Volúmenes en Kubernetes

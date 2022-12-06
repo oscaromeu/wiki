@@ -3,6 +3,7 @@ id: observabilidad
 title: Observabilidad
 sidebar_label: Observabilidad
 sidebar_position: 11
+draft: true
 ---
 
 ## Realizar checks para verificar el correcto funcionamiento de las aplicaciones

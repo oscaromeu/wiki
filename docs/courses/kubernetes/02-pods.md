@@ -3,6 +3,7 @@ id: pod
 title: Pods
 sidebar_label: Pods
 sidebar_position: 3
+draft: true
 ---
 
 # Pod

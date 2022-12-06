@@ -3,6 +3,7 @@ id: configuracion
 title: Configuracion
 sidebar_label: Configuration
 sidebar_position: 4
+draft: true
 ---
 
 ## Variables de entorno

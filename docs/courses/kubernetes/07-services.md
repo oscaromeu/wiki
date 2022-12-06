@@ -3,6 +3,7 @@ id: services
 title: Servicios.
 sidebar_label: Services
 sidebar_position: 8
+draft: true
 ---
 
 Supongamos el siguiente escenario, tengo un pod cliente que quiere hablar con uno de mis pods corriendo en el cluster. En este caso mi pod es un sitio web, además supongamos que por el alto volumen de tráfico tenemos varias replicas. ¿Cómo sabe el pod cliente como conectarse a uno de mis pods?

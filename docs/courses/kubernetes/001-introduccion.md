@@ -3,6 +3,7 @@ id: Introducción
 title: Introducción
 sidebar_label: Introducción
 sidebar_position: 1
+draft: true
 ---
 
 ## Implantación de aplicaciones web

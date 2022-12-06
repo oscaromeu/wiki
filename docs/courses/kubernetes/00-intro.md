@@ -3,6 +3,7 @@ id: objetos
 title: Objetos
 sidebar_label: Objetos
 sidebar_position: 2
+draft: true
 ---
 
 Los objetos en Kubernetes son entidades que persisten en el sistema, específicamente en el componente `etcd`. Cada objeto representa un estado en Kubernetes y entre todos conforman el estado del cluster. Algunos ejemplos de las representaciones de estos estados puede ser:

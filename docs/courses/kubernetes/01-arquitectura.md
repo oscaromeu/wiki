@@ -3,6 +3,7 @@ id: arquitectura
 title: Arquitectura de Kubernetes
 sidebar_label: Arquitectura de Kubernetes
 sidebar_position: 1
+draft: true
 ---
 
 # Arquitectura de Kubernetes

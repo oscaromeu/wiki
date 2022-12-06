@@ -108,8 +108,6 @@ flux get sources git
 flux reconcile source git live-infra-secrets
 ```
 
-
-
 ## Encrypt secrets with sops and age
 
 ### Configure age to encrypt secrets with sops

@@ -4,6 +4,7 @@ title: Managing pod's computational resources
 sidebar_label: Managing pod's computational resources
 sidebar_position: 1
 hide_table_of_contents: true
+draft: true
 ---
 
 Setting both how much a pod is expected to consume and the maximum amount it's allowed to consume is vital part of any pod definition. Setting these two parameters makes sure that a pod takes only its fair share of the resources provided by the Kubernetes cluster and also affects how pods are scheduled across the cluster. 

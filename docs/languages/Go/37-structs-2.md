@@ -33,7 +33,7 @@ type Planet struct {
 }
 ```
 
-Now we can access fields like `Mass` through the `HeavenlyBody` field. 
+Now we can access fields like `Name` through the `HeavenlyBody` field. 
 
 ```go
 func main() {
@@ -72,15 +72,15 @@ type Planet struct {
 func main() {
     var p Planet
     p.Name = "Venus" 
-    fmt.Println("Accessing an anonymous field's field:", p.HeavenlyBody.Name)
+    fmt.Println("Accessing an anonymous field's field:", p.Name)
 }
 ```
 
 Note that the `CelestialBody` field is not entirely anonymous; we still can refer to it through the type name.
 
 ```go
-p.CelestialBody.Gravity = 8.9
-fmt.Println("p2.CelestialBody.Gravity is", p.CelestialBody.Gravity)
+p.CelestialBody.Name = 8.9
+fmt.Println("p2.CelestialBody.Name is", p.CelestialBody.Name)
 ```
 
 It is entirely possible that a struct contains a field of the same name as the field of an embedded struct. In this case, the shortcut to the embedded struct’s field does not work anymore, and we have to use the full access path.
@@ -133,98 +133,3 @@ So far, struct embedding and anonymous fields may seem no more than a convenienc
 + The full access path is still available by using the type name of the embedded struct in place of the missing field name.
 + If a field name appears in both structs, the shortcut to the embedded struct’s field is not available.
 + Struct literals have no shortcut notation. Use the embedded struct’s literal representation to initialize an embedded struct’s field.
-
-## Struct field tags and JSON
-
-Assume you have this `weatherData` struct
-
-```go
-type weatherData struct {
-    LocationName  string  
-    Weather       string
-    Temperature   int  
-    Celsius       bool 
-    TempForecast []int 
-}
-```
-
-and you want to generate JSON data from a `weatherData` variable. The package `encoding/json` from the standard library makes this easy as pie:
-
-```go
-weather := weatherData{
-    LocationName: "Zzyzx",
-    Weather:      "sunny",
-    Temperature:  80,
-    Celsius:      false,
-    TempForecast: []int{ 27, 25, 28 },
-}
-data, err := json.MarshalIndent(data, &weather)
-```
-
-And we get a nicely formatted JSON output:
-
-```json
-{
-  "LocationName": "Zzyzx",
-  "Weather": "sunny",
-  "Temperature": 80,
-  "Celsius": false,
-  "TempForecast": [
-    27,
-    25,
-    28
-  ]
-}
-```
-
-However, there are a few problems here:
-
-+ The JSON fields should have lowercase names
-+ The field `LocationName` should have the name location in the JSON data
-+ `TempForecast` should contain an underscore in JSON, but this is not in line with the Go style guide.
-+ And finally, the "celsius" field is optional and thus can be omitted from the JSON data if it carries the default value.
-
-So you don't want to rename the struct fields, but how can we then create the desired JSON format?
-Luckily there is a solution that can't be easier: Field tags.
-
-```go
-type weatherData struct {
-    LocationName string `json:"location"`
-    Weather      string `json:"weather"`
-    Temperature  int    `json:"temp"`
-    Celsius      bool   `json:"celsius,omitempty"`
-    TempForecast []int  `json:"temp_forecast"`
-}
-```
-
-A field tag is simply a string literal that can be added to a struct field. These field tags contain metadata about the fields. In case of JSON, a field tag can specify the JSON name of the field and other properties; for example, whether to omit the field entirely when it is empty. 
-
-We use raw strings enclosed in backticks here, because the strings contain double quotes, and this saves us from having to escape each double quote with a backslash.
-
-The `json` package processes all field tags starting with "json:" when marshalling the data.
-
-Now the output meets our requirements:
-
-```json
-{
-  "location": "Zzyzx",
-  "weather": "sunny",
-  "temp": 80,
-  "temp_forecast": [
-    27,
-    25,
-    28
-  ]
-}
-```
-
-Field tags are also useful in other contexts; for example, when accessing the tables and fields of a SQL database.
-
-You can even write your own field tag parser; however, this requires the use of Reflection techniques that are explained later, and therefore we will not go into details here.
-
-### Summary
-
-+ Struct fields can have tags.
-+ A tag is a string literal that is appended to a field declaration.
-+ A tag contains metadata about the tagged field.
-+ Some packages of the standard library can parse these tags to get more information about how to process the fields.

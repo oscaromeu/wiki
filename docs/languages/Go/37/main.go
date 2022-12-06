@@ -2,7 +2,10 @@
 // Click here and start typing.
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 
 type CelestialBody struct {
@@ -21,6 +24,8 @@ type Planet struct {
     Satellites       []string
     next, previous   *Planet
 }
+
+
 func main() {
     var p Planet
     p.CelestialBody.Name = "Mercury"

@@ -1,4 +1,4 @@
- Wiki
+ # Wiki
 
 This is my personal wiki where I document things I have learned. The project is
 

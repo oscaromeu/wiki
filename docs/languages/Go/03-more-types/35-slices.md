@@ -416,6 +416,63 @@ func main() {
 }
 ```
 
+## Pass By Value Semantics
+
+In Go, when a variable is passed to a function, only a copy of its value is made. This means that any changes made to the variable inside the function will not affect the original variable in the caller. However, slices and maps are a special case because they contain a pointer to an underlying data structure. When a slice or map is passed to a function, only a copy of the pointer is made, not a copy of the entire data structure (Go does no deep copying when passing values to functions. Go does not follow any pointers and does not copy any values being pointed to). This means that any changes made to the slice or map elements inside the function will be visible to the caller, because both the caller and the function are pointing to the same underlying data structure.
+
+For example:
+
+```go
+func changeElement(s []int) {
+    s[0] = -1
+}
+
+func main() {
+    s1 := []int{1, 2, 3}
+    fmt.Println(s1)  // [1, 2, 3]
+    changeElement(s1)
+    fmt.Println(s1)  // [-1, 2, 3]
+}
+```
+
+Let's try to modify the header of the slice
+
+```go
+func changeSlice(s []int) {
+    s = []int{4, 5, 6}
+}
+
+func main() {
+    s1 := []int{1, 2, 3}
+    fmt.Println(s1)  // [1, 2, 3]
+    changeElement(s1)
+    fmt.Println(s1)  // [-1, 2, 3]
+    changeSlice(s1)
+    fmt.Println(s1)  // [-1, 2, 3] (s1 is not affected by changeSlice)
+}
+```
+
+In this example, the value of `s` is being reassigned to a new slice `[]int{4, 5, 6}` inside the `changeSlice` function. This does not affect the original `s1` slice in the caller, because `s1` and `s` are two separate variables with their own copies of the slice header. The assignment `s = []int{4, 5, 6}` only changes the value of the `s` variable, which is a local variable inside the changeSlice function. It does not affect the value of s1 in the caller.
+
+To modify the original `s1` slice in the caller, you would need to modify the elements of s directly, rather than reassigning the value of `s`. For example:
+
+```go
+func changeSlice(s []int) {
+    s[0] = 4
+    s[1] = 5
+    s[2] = 6
+}
+
+func main() {
+    s1 := []int{1, 2, 3}
+    fmt.Println(s1)  // [1, 2, 3]
+    changeElement(s1)
+    fmt.Println(s1)  // [-1, 2, 3]
+    changeSlice(s1)
+    fmt.Println(s1)  // [4, 5, 6] (s1 is now changed by changeSlice)
+}
+```
+
 ## Summary
 
 + A slice represents a section of an underlying array.
